@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <div id="calendar"></div>
+    <div class="mt-[20px]">
+        <h1 class="text-[20px] font-semibold">
+            All Appointment Lists
+        </h1>
+        <div id="appointmentList" class="appointments-container">
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Initialize FullCalendar
+        let calendarEl = document.getElementById('calendar');
+        let appointmentListEl = document.getElementById('appointmentList');
+        let calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            events: '/appointments',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            dateClick:function(info){
+                let appointments = $(info.dayEl).find('.fc-event-title').map(function () {
+                    return $(this).text();
+                }).get();
+                console.log(info)
+                appointmentListEl.innerHTML = '';
+
+            // If there are appointments, display them in the div
+            if (appointments.length > 0) {
+                appointments.forEach(function (appointment) {
+                    let appointmentDiv = document.createElement('div');
+                    appointmentDiv.textContent = appointment;
+                    appointmentDiv.classList.add('appointment-item'); // Add class for styling if needed
+                    appointmentListEl.appendChild(appointmentDiv);
+                });
+            } else {
+                // If no appointments found for the selected date
+                let noAppointmentDiv = document.createElement('div');
+                noAppointmentDiv.textContent = 'No appointments for this date.';
+                appointmentListEl.appendChild(noAppointmentDiv);
+            }
+            }
+        });
+        calendar.render();
+
+        // Load available slots into dropdown
+        $.get('/available_slots', function (slots) {
+            let slotSelect = $('#available-slots');
+            slots.forEach(slot => {
+                slotSelect.append(new Option(
+                    `${slot.doctor_name} - ${new Date(slot.start).toLocaleString()}`,
+                    JSON.stringify(slot)
+                ));
+            });
+        });
+
+        // Booking an appointment
+        $('#book-appointment-btn').on('click', function () {
+            let selectedSlot = JSON.parse($('#available-slots').val());
+            $.ajax({
+                url: '/book_appointment',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    doctor_name: selectedSlot.doctor_name,
+                    start: selectedSlot.start,
+                    end: selectedSlot.end
+                }),
+                success: function (response) {
+                    alert(response.message);
+                    // Refresh the calendar to display the new appointment
+                    calendar.refetchEvents();
+                },
+                error: function (error) {
+                    alert(error.responseJSON.message);
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}

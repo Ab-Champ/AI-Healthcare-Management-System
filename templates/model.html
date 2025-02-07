@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container" style="position: relative;">
+    <div class="model" style="width: 100%; height: 100vh; position: relative; z-index: 1;">
+        <spline-viewer 
+        url="https://prod.spline.design/InciWTmX49Eq1Pgx/scene.splinecode">
+        </spline-viewer>
+    </div>
+
+    <!-- Modal to show body part information -->
+    <div id="infoModal" class="modal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.5); display: none; z-index: 10; justify-content: center; align-items: center;">
+        <div class="modal-content" style="background: white; padding: 20px; border-radius: 10px;">
+            <p class="cursor-pointer" id="bodyPartInfo">Click on a body part for details.</p>
+        </div>
+    </div>
+    
+    <!-- Stats Popup -->
+    <div class="stats w-full h-[100vh] z-[100] relative" id="statsPopup" style="display: none; position: fixed; top: 0; left: 250px; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 20;">
+        
+            <h1 class="heading">Heart Health Statistics</h1>
+            <div class="stat-card top-[70px] left-[20px]">
+                <h1>Hearbeat</h1>
+                <div>
+                    <p>120/80</p>
+                    <p>per min</p>
+                </div>
+            </div>
+            <div class="stat-card top-[70px] left-[210px]">
+                <h1>Blood Pressure</h1>
+                <div>
+                    <p>100/67</p>
+                    <p>mmHg</p>
+                </div>
+            </div>
+            <div class="stat-card top-[260px] left-[20px]">
+                <h1>Heart Health</h1>
+                <div class="w-[100px]">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+            <div class="stat-card top-[260px] left-[210px]">
+                <h1>Heart MRI</h1>
+                <div class="w-[130px] mt-[10px] rounded-[10px]">
+                    <img src="../staticFolder/heart-CT-scans-1296x728-header-1024x575.webp" alt="">
+                </div>
+            </div>
+
+            <div class="stat-card top-[70px] right-[280px]">
+                <h1>RBC Count</h1>
+                <div>
+                    <p>4.9</p>
+                    <p>million cell per microliter</p>
+                </div>
+            </div>
+            <div class="stat-card top-[70px] right-[480px]">
+                <h1>PAP Value</h1>
+                <div>
+                    <p>100/67</p>
+                    <p>mmHg</p>
+                </div>
+            </div>
+            <div class="stat-card top-[260px] right-[280px]">
+                <h1>Stroke Volume</h1>
+                <div class="w-[100px]">
+                    <p>60/80</p>
+                    <p>mL per Beat</p>
+                </div>
+            </div>
+            <div class="stat-card top-[260px] right-[480px]">
+                <h1>ECG Graph</h1>
+                <div class="w-[150px] mt-[10px] rounded-[10px]">
+                    <img src="../staticFolder/pngtree-vector-eps-10-of-ekg-cardio-pulse-sign-isolated-on-a-white-background-as-heartbeat-line-symbol-vector-png-image_46306308.jpg" alt="">
+                </div>
+            </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.28/build/spline-viewer.js"></script>
+
+<script>
+    const splineViewer = document.querySelector('spline-viewer');
+
+    // Define body part information based on object IDs in the Spline model
+    const icons = [
+        {
+            name: "headIcon",
+            centerX: 732, // X-coordinate for the center of the head icon
+            centerY: 101, // Y-coordinate for the center of the head icon
+            radius: 20,   // Radius of the head icon
+            content: "This is the head. It contains the brain, eyes, and ears."
+        },
+        {
+            name: "heartIcon",
+            centerX: 804, // X-coordinate for the center of the heart icon
+            centerY: 211, // Y-coordinate for the center of the heart icon
+            radius: 20,   // Radius of the heart icon
+            content: "This is the heart. It pumps blood throughout the body."
+        },
+        {
+            name: "kidney",
+            centerX: 751, // X-coordinate for the center of the arm icon
+            centerY: 283, // Y-coordinate for the center of the arm icon
+            radius: 20,   // Radius of the arm icon
+            content: "This is the kidney. It includes muscles and its responsible for filtering"
+        }
+        // Add more icons/regions here as needed
+    ];
+
+    // Modal and stats popup elements
+    const modal = document.getElementById("infoModal");
+    const bodyPartInfo = document.getElementById("bodyPartInfo");
+    const statsPopup = document.getElementById("statsPopup");
+
+    // Modal close logic
+    window.onclick = function (event) {
+        // Check if clicked outside modal content for infoModal
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+        // Check if clicked outside statsPopup content
+        if (event.target == statsPopup) {
+            statsPopup.style.display = "none";
+        }
+    }
+
+    // Handle Spline raycast events to detect clicked objects
+    splineViewer.addEventListener('click', (event) => {
+        const clickX = event.clientX;
+        const clickY = event.clientY;
+
+        let clickedIcon = null;
+
+        for (let icon of icons) {
+            // Calculate the distance between the clicked point and the icon's center
+            const distance = Math.sqrt(Math.pow(clickX - icon.centerX, 2) + Math.pow(clickY - icon.centerY, 2));
+
+            // Check if the click is within the circle (icon area)
+            if (distance <= icon.radius) {
+                clickedIcon = icon;
+                break; // Exit the loop once we've found the clicked icon
+            }
+        }
+
+        // Check if the clicked part is the heart icon
+        if (clickedIcon) {
+            bodyPartInfo.innerHTML = clickedIcon.content;
+            modal.style.display = "flex"; 
+
+            // Close the modal and show stats when clicking the info text
+            bodyPartInfo.addEventListener('click', () => {
+                modal.style.display = "none"; // Hide the modal
+                statsPopup.style.display = "flex"; // Show the stats popup
+            });
+        } else {
+            modal.style.display = "none"; // Hide the modal if clicked elsewhere
+            statsPopup.style.display = "none"; // Hide stats popup if clicked elsewhere
+        }
+    });
+
+    // Create Pie Chart for heart health
+    const pie = document.getElementById('pieChart');
+    const pieData = {
+        datasets: [{
+            label: 'Heart Health',
+            data: [70, 30],
+            backgroundColor: [
+                'rgb(255, 99, 132)',
+                'rgb(54, 162, 235)',
+            ],
+            hoverOffset: 10
+        }]
+    };
+
+    new Chart(pie, {
+        type: 'doughnut',
+        data: pieData,
+    });
+</script>
+
+{% endblock %}

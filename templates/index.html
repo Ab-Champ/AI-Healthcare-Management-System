@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="main-container">
+        <div class="container">
+            <div class="profile-info">
+                <div class="profile-text">
+                    <span class="hello">Hello,</span>
+                    <span class="name">{{ username }}</span>
+
+                </div>
+    
+                <div class="profile-img">
+                    <img src="" alt="profile-img">
+                </div>
+            </div>
+            
+            {% if personal_data %}
+            <div class="user-info">
+                <div class="info-params">
+                    {% for ud in personal_data %}
+                    <span class="value">{{ ud['height'] }}</span>
+                    <span class="param">Height</span>
+                </div>
+                {% endfor %}
+                <div class="info-params">
+                    {% for ud in personal_data %}
+                    <span class="value">{{ ud['weight'] }}</span>
+                    <span class="param">Weight</span>
+                </div>
+                {% endfor %}
+                <div class="info-params">
+                    {% for ud in personal_data %}
+                    <span class="value">22</span>
+                    <span class="param">Age</span>
+                </div>
+                {% endfor %}
+
+                <div class="info-params">
+                    {% for ud in personal_data %}
+                    <span class="value">{{ ud['gender'] }}</span>
+                    <span class="param">Gender</span>
+                </div>
+                {% endfor %}
+            </div>
+    
+            <div class="health-details">
+                <div class="card">
+                    {% for ud in personal_data %}
+                    <span class="measure">Heart Rate</span>
+                    <span class="measure-value">92</span>
+                    {% endfor %}
+                </div>
+                <div class="card">
+                    {% for ud in personal_data %}
+                    <span class="measure">Calories</span>
+                    <span class="measure-value">2000</span>
+                    {% endfor %}
+                </div>
+                <div class="card">
+                    {% for ud in personal_data %}
+                    <span class="measure">Steps</span>
+                    <span class="measure-value">1000</span>
+                    {% endfor %}
+                </div>
+                <div class="card">
+                    {% for ud in personal_data %}
+                    <span class="measure">Blood Pressure</span>
+                    <span class="measure-value">150</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+        </div>
+
+        <div class="chart-container">
+
+            <div class="chartDiv">
+                <h1>Daily Caloreis Count</h1>
+                <div class="w-[600px]">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chartDiv">
+                <h1>Blood Pressure Chart</h1>
+                <div class="w-[300px]">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chartDiv">
+                <h1>Heart Beat Pattern</h1>
+                <div class="w-[600px]">
+                    <canvas id="lineChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.28/build/spline-viewer.js"></script>
+<script>
+    const bar = document.getElementById('barChart');
+    const pie = document.getElementById('pieChart');
+    const line = document.getElementById('lineChart');
+
+    const barData = {
+    labels: ['Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat', 'Sun'],
+    datasets: [{
+        label: 'Daily Calories Count',
+        data: [2000, 2100, 2050, 2101, 1990, 2500, 1945],
+        backgroundColor: [
+        'rgba(255, 99, 132)',
+        'rgba(255, 159, 64)',
+        'rgba(255, 205, 86)',
+        'rgba(75, 192, 192)',
+        'rgba(54, 162, 235)',
+        'rgba(153, 102, 255)',
+        'rgba(201, 203, 207)'
+        ],
+        borderColor: [
+        'rgb(255, 99, 132)',
+        'rgb(255, 159, 64)',
+        'rgb(255, 205, 86)',
+        'rgb(75, 192, 192)',
+        'rgb(54, 162, 235)',
+        'rgb(153, 102, 255)',
+        'rgb(201, 203, 207)'
+        ],
+        borderWidth: 1,
+    }]
+    };
+    
+    new Chart(bar, {
+        type: 'bar',
+        data: barData,
+        options: {
+        scales: {
+            y: {
+            beginAtZero: true
+            }
+        }
+        }
+    });
+
+    const pieData = {
+    labels: [
+        'Red',
+        'Blue',
+        'Yellow'
+    ],
+    datasets: [{
+        label: 'My First Dataset',
+        data: [300, 50, 100],
+        backgroundColor: [
+        'rgb(255, 99, 132)',
+        'rgb(54, 162, 235)',
+        'rgb(255, 205, 86)'
+        ],
+        hoverOffset: 10
+    }]
+    };
+
+    new Chart(pie, {
+        type: 'doughnut',
+        data: pieData,
+    });
+
+    const lineData = {
+    labels: ['8am', '9am', '10am', '11am', '12pm', '1pm', '2pm'],
+    datasets: [{
+        label: 'Day 1',
+        data: [88, 79, 80, 81, 101, 98, 87],
+        fill: false,
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1
+    },{
+        label: 'Day 2',
+        data: [94, 101, 86, 79, 81, 76, 91],
+        fill: false,
+        borderColor: 'rgb(54, 162, 235)',
+        tension: 0.1
+    }]
+    };
+
+    new Chart(line, {
+        type: 'line',
+        data: lineData,
+    })
+</script>
+
+{% endblock %}
